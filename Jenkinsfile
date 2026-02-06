@@ -43,7 +43,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "html-app"
-        GIT_URL = "https://github.com/javeedaws/html-docker-jenkins.git"
     }
 
     stages {
@@ -54,7 +53,7 @@ pipeline {
             }
         }
 
-        stage("Build") {
+        stage("Build Docker Image") {
             steps {
                 sh "docker build -t $IMAGE_NAME:$BRANCH_NAME ."
             }
@@ -72,13 +71,14 @@ pipeline {
             }
             steps {
                 sh '''
-                git config user.email "javeedaws60@gmail.com"
+                git config user.email "jenkins@lab.com"
                 git config user.name "Jenkins"
 
                 git checkout main
-                git pull $GIT_URL main
-                git merge dev
-                git push $GIT_URL main
+                git pull origin main
+
+                git merge origin/dev
+                git push origin main
                 '''
             }
         }
@@ -98,12 +98,11 @@ pipeline {
 
     post {
         success {
-            echo "✅ Pipeline SUCCESS for branch: ${BRANCH_NAME}"
-            sh "docker images | grep $IMAGE_NAME || true"
+            echo "✅ SUCCESS: ${BRANCH_NAME} pipeline completed"
         }
 
         failure {
-            echo "❌ Pipeline FAILED for branch: ${BRANCH_NAME}"
+            echo "❌ FAILED: ${BRANCH_NAME} pipeline failed"
         }
 
         always {
@@ -111,3 +110,4 @@ pipeline {
         }
     }
 }
+
