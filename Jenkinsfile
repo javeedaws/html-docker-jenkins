@@ -53,7 +53,7 @@ pipeline {
             }
         }
 
-        stage("Build Docker Image") {
+        stage("Build") {
             steps {
                 sh "docker build -t $IMAGE_NAME:$BRANCH_NAME ."
             }
@@ -62,24 +62,6 @@ pipeline {
         stage("Test") {
             steps {
                 sh "docker run --rm $IMAGE_NAME:$BRANCH_NAME ls /usr/share/nginx/html"
-            }
-        }
-
-        stage("Auto Merge Dev → Main") {
-            when {
-                branch "dev"
-            }
-            steps {
-                sh '''
-                git config user.email "jenkins@lab.com"
-                git config user.name "Jenkins"
-
-                git checkout main
-                git pull origin main
-
-                git merge origin/dev
-                git push origin main
-                '''
             }
         }
 
@@ -98,16 +80,12 @@ pipeline {
 
     post {
         success {
-            echo "✅ SUCCESS: ${BRANCH_NAME} pipeline completed"
+            echo "✅ ${BRANCH_NAME} passed"
         }
-
         failure {
-            echo "❌ FAILED: ${BRANCH_NAME} pipeline failed"
-        }
-
-        always {
-            echo "🧹 Pipeline finished for ${BRANCH_NAME}"
+            echo "❌ ${BRANCH_NAME} failed"
         }
     }
 }
+
 
